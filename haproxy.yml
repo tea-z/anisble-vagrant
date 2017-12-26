@@ -1,0 +1,11 @@
+---
+- hosts: haproxy
+  become: yes
+  become_user: root
+  tasks:
+  - name: Install HAproxy
+    yum: name=haproxy state=latest
+  - name: Configure HAproxy
+    template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+  - name: Make sure Haproxy is started
+    service: name=haproxy state=started enabled=yes
