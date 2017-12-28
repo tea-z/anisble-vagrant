@@ -7,5 +7,7 @@
     yum: name=haproxy state=latest
   - name: Configure HAproxy
     template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+  - name: Upload SSL certificate
+    template: src=comprigo-tzidanic.tk.pem.j2 dest=/etc/ssl/comprigo-tzidanic.tk.pem
   - name: Make sure Haproxy is started
     service: name=haproxy state=started enabled=yes
