@@ -1,0 +1,52 @@
+global
+        ca-base /etc/ssl
+        crt-base /etc/ssl
+        ssl-default-bind-options no-sslv3
+        maxconn 20000
+        stats socket /var/run/haproxy.sock mode 600 level admin
+        ssl-default-bind-ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+
+defaults
+        mode http
+        timeout client 10s
+        timeout server 1800s
+        timeout connect 10s
+        timeout queue 60s
+        timeout check 1s
+
+        option forwardfor
+        option httplog
+        no option forceclose
+        no option tcp-smart-accept
+        option http-no-delay
+        log global
+        log 127.0.0.1 local0
+        fullconn 10000
+        balance leastconn
+
+listen Assignment
+
+        bind 0.0.0.0:80
+        bind 0.0.0.0:443 ssl crt ./comprigo-tzidanic.tk.pem
+
+
+        option http-server-close
+        option forwardfor
+        reqadd X-Forwarded-Proto:\ https
+        reqadd X-Forwarded-Port:\ 443
+
+        # set HTTP Strict Transport Security (HTST) header
+        rspadd  Strict-Transport-Security:\ max-age=15768000
+
+        redirect scheme https code 301 if !{ ssl_fc }
+
+
+        server nginx1 10.1.1.41:443 check ssl verify none
+        server nginx2 10.1.1.42:443 check ssl verify none backup
+
+listen http_stats
+        bind *:8080
+        stats enable
+        stats uri /haproxy?stats
+        monitor-uri /haproxy_test
+
