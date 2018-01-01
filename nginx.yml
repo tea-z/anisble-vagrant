@@ -1,0 +1,46 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+  - name: Install Epel-Release
+    yum: name=epel-release state=latest
+  - name: Install nginx
+    yum: name=nginx state=latest
+  - name: Configure Nginx
+    template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  - name: Add certificates
+    template: src=comprigo-tzidanic.tk.crt.j2 dest=/etc/ssl/comprigo-tzidanic.crt
+  - name: Upload key
+    template: src=comprigo-tzidanic.tk.key.j2 dest=/etc/ssl/comprigo-tzidanic.key
+  - name: Install php
+    yum: name=php state=latest
+  - name: Install php-mysql
+    yum: name=php-mysql state=latest
+  - name: Install php-fpm
+    yum: name=php-fpm state=latest
+  - name: Configure php.ini
+    template: src=php.ini.j2 dest=/etc/php.ini
+  - name: Configure php-fpm
+    template: src=www.conf.j2 dest=/etc/php-fpm.d/www.conf
+  - name: Start php-fpm
+    service: name=php-fpm state=started enabled=yes
+  - name: Place hello world index.php
+    template: src=index.php.j2 dest=/usr/share/nginx/html/index.php
+  - name: Install MySQL
+    yum: name=mariadb state=latest
+    yum: name=mariadb-server state=latest
+  - name: Start Nginx
+    service: name=nginx state=started enabled=yes
+  - name: Install redis
+    yum: name=redis state=latest
+  - name: Configure Redis
+    template: src=redis.conf.j2 dest=/etc/redis.conf
+  - name: Make sure Redis is started
+    service: name=redis state=started enabled=yes
+  - name: Insert Timer Unit file bash script
+    template: src=redis-script.sh.j2 dest=/usr/share/redis-script.sh mode=0755
+  - name: Set cron to execute the script
+    cron: minute=5 name=Load_dummy_data_into_redis cron_file=redis-script.sh user=root job=/usr/share/redis-script.sh
+  - name: Restart Nginx
+    service: name=nginx state=restarted

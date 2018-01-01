@@ -7,7 +7,15 @@
     yum: name=haproxy state=latest
   - name: Configure HAproxy
     template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
-  - name: Upload SSL certificate
+  - name: Upload cerificate in pem file
     template: src=comprigo-tzidanic.tk.pem.j2 dest=/etc/ssl/comprigo-tzidanic.tk.pem
+  - name: Upload LetsEncrypt root certificate
+    template: src=letsencrypt.pem.j2 dest=/etc/ssl/letsencrypt.pem.j2
+  - name: Upload website certificate
+    template: src=comprigo-tzidanic.tk.crt.j2 dest=/etc/ssl/comprigo-tzidanic.tk.crt
+  - name: Upload OCSP stapling script
+    template: src=ocsp.sh.j2 dest=/etc/ssl/ocsp.sh mode=0755
+  - name: Setup cronjob to run OCSP script
+    cron: minute=20 name=Send_ocsp_status_to_haproxy cron_file=ocsp-status user=root job=/etc/ssl/ocsp.sh
   - name: Make sure Haproxy is started
     service: name=haproxy state=started enabled=yes

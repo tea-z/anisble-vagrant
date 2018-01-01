@@ -1,0 +1,4 @@
+#/bin/bash
+redis-cli SET mykey "Hello World"
+redis-cli EXPIRE mykey 5
+redis-cli TTL mykey

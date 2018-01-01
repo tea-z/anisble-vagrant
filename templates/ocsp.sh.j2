@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Certificates path and names
+DIR="/etc/ssl"
+CERT="comprigo-tzidanic.tk.pem"
+
+# Get the issuer URI, download it's certificate and convert into PEM format
+ISSUER_URI=$(openssl x509 -in ${DIR}/${CERT} -text -noout | grep 'CA Issuers' | cut -d: -f2,3)
+ISSUER_NAME=$(echo ${ISSUER_URI##*/} | while read -r fname; do echo ${fname%.*}; done)
+wget -q -O- $ISSUER_URI | openssl x509 -inform DER -outform PEM -out ${DIR}/${ISSUER_NAME}.pem
+
+# Get the OCSP URL from the certificate
+ocsp_url=$(openssl x509 -noout -ocsp_uri -in ${DIR}/${CERT})
+
+# Extract the hostname from the OCSP URL
+ocsp_host=$(echo $ocsp_url | cut -d/ -f3)
+
+# Create/update the ocsp response file and update HAProxy
+openssl ocsp -issuer letsencrypt.pem -cert comprigo-tzidanic.tk.crt -url http://ocsp.int-x3.letsencrypt.org -header Host ocsp.int-x3.letsencrypt.org -no_nonce -noverify -respout comprigo-tzidanic.tk.pem.ocs
+[[ $? -eq 0 ]] && [[ $(pidof haproxy) ]] && [[ -s ${DIR}/${CERT}.ocsp ]] && echo "set ssl ocsp-response $(/usr/bin/base64 -w 10000 ${DIR}/${CERT}.ocsp)" | socat stdio unix-connect:/var/run/haproxy.sock
+
+exit 0
+

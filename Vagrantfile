@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
     nginx1.vm.provision "ansible" do |ansible|
         ansible.sudo = true
         ansible.verbose = "v"
-        ansible.playbook = "nginx1.yml"
+        ansible.playbook = "nginx.yml"
     end
   end
   config.vm.define :nginx2 do |nginx2|
@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
     nginx2.vm.provision "ansible" do |ansible|
         ansible.sudo = true
         ansible.verbose = "v"
-        ansible.playbook = "nginx2.yml"
+        ansible.playbook = "nginx.yml"
     end
   end
 end
