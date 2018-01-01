@@ -12,7 +12,7 @@ A simple PHP website is served.
 
 ## Overview
 
-It will create 1 vagrant with HAProxy, 2 with nginx, php-fpm, redis and MySQL  
+It will create 1 vagrant VM with HAProxy, 2 VMs with nginx, php-fpm, redis and MySQL  
 You can customize predefined private IPs in the Vagrantfile.
 Tested on CentOS 7.4.
 
@@ -57,6 +57,7 @@ rspadd  Strict-Transport-Security:\ max-age=15768000
 ```
 stats socket /var/run/haproxy.sock mode 600 level admin
 ```
+ansible-vagrant/templates/ocsp.sh.j2
 
 - Send traffic to nginx SSL backend
 ```
@@ -84,3 +85,4 @@ Socket should be a bit faster than TCP as networking is not involved. TCP would 
 
 
 ### Redis
+ansible-vagrant/templates/redis-script.sh.j2
