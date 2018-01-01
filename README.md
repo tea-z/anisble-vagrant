@@ -1,4 +1,4 @@
-Ansible-vagrant-HAProxy-nginx-PHP-redis-MySQL
+Ansible-vagrant-HAProxy-nginx-PHP-FPM-redis-MySQL
 =============================================
 
 A playbook for provisioning vagrants with HAProxy, nginx, php-fpm, redis, MySQL.
